@@ -1,30 +1,65 @@
-import { Fragment } from 'react'
+import { Fragment, useState, useEffect } from 'react'
+import useSWR from 'swr'
+import { useRouter } from 'next/router'
+import Head from 'next/head'
 import EventList from '../../components/events/event-list'
 import EventTile from "../../components/events/results-title"
 import ErrorAlert from "../../components/ui/error-alert"
 import Button from "../../components/ui/button"
-import { getFilteredEvents } from "../../helpers/api-util"
 
 
-export default function FilteredEventPage(props) {
-    //const router = useRouter()
-    // const filteredData = router.query.slug
 
-    // if (!filteredData) {
-    //     return <p className="center">Loading</p>
-    // }
+export default function FilteredEventPage() {
+    const router = useRouter()
+    const [loadedEvents, setLoadEvents] = useState([])
+    const filteredData = router.query.slug
+
+    const { data, error } = useSWR('https://nextjs-78e8b-default-rtdb.firebaseio.com/events.json')
+
+    useEffect(() => {
+        if (data) {
+            let events = []
+
+            for (const key in data) {
+                events.push({
+                    id: key,
+                    ...data[key]
+                });
+            }
+            setLoadEvents(events)
+        }
+    }, [data])
 
 
-    // const year = filteredData[0]
-    // const month = filteredData[1]
+    const year = filteredData[0]
+    const month = filteredData[1]
 
-    // const numYear = +year
-    // const numMonth = +month
+    const numYear = +year
+    const numMonth = +month
 
+    const pageHead = (
+        <Head>
+            <title>Filtered Events</title>
+            <meta name="description" content={`Filtered events for ${numMonth}/${numYear}`} />
+        </Head>
+    )
 
-    if (props.hasError) {
+    if (!filteredData) {
         return (
             <Fragment>
+                {pageHead}
+                <p className="center">Loading</p>
+            </Fragment>
+        )
+    }
+
+
+
+
+    if (isNaN(numYear) || isNaN(numMonth) || numYear > 2030 || numYear < 2021 || numMonth < 1 || numMonth > 12 || error) {
+        return (
+            <Fragment>
+                {pageHead}
                 <ErrorAlert >
                     <p>Invalid Filter of Events</p>
                 </ErrorAlert >
@@ -35,12 +70,16 @@ export default function FilteredEventPage(props) {
         )
     }
 
-    const filteredEvents = props.events
+    let filteredEvents = loadedEvents.filter((event) => {
+        const eventDate = new Date(event.date);
+        return eventDate.getFullYear() === numYear && eventDate.getMonth() === numMonth - 1;
+    });
 
 
     if (!filteredEvents || filteredEvents.length === 0) {
         return (
             <Fragment>
+                {pageHead}
                 <ErrorAlert>
                     <p>No Events found</p>
                 </ErrorAlert>
@@ -52,11 +91,12 @@ export default function FilteredEventPage(props) {
     }
 
 
-    const date = new Date(props.date.numYear, props.date.numMonth - 1)
+    const date = new Date(numYear, numMonth - 1)
 
 
     return (
         <Fragment>
+            {pageHead}
             <EventTile date={date} />
             <EventList events={filteredEvents} />
         </Fragment>
@@ -64,36 +104,3 @@ export default function FilteredEventPage(props) {
 }
 
 
-export async function getServerSideProps(context) {
-    const { params } = context
-
-    const filteredData = params.slug
-
-    const year = filteredData[0]
-    const month = filteredData[1]
-
-    const numYear = +year
-    const numMonth = +month
-
-    if (isNaN(numYear) || isNaN(numMonth) || numYear > 2030 || numYear < 2021 || numMonth < 1 || numMonth > 12) {
-        return {
-            props: {
-                hasError: true
-            }
-        }
-    }
-
-    const filteredEvents = await getFilteredEvents({ year: numYear, month: numMonth })
-
-
-    return {
-        props: {
-            events: filteredEvents,
-            date: {
-                numYear: numYear,
-                numMonth: numMonth
-            }
-        },
-
-    };
-}
