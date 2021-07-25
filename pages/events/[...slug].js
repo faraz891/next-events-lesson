@@ -31,16 +31,13 @@ export default function FilteredEventPage() {
     }, [data])
 
 
-    const year = filteredData[0]
-    const month = filteredData[1]
 
-    const numYear = +year
-    const numMonth = +month
+    let pageHead;
 
-    const pageHead = (
+    pageHead = (
         <Head>
             <title>Filtered Events</title>
-            <meta name="description" content={`Filtered events for ${numMonth}/${numYear}`} />
+            <meta name="description" content='Filtered Events' />
         </Head>
     )
 
@@ -53,8 +50,18 @@ export default function FilteredEventPage() {
         )
     }
 
+    const year = filteredData[0]
+    const month = filteredData[1]
 
+    const numYear = +year
+    const numMonth = +month
 
+    pageHead = (
+        <Head>
+            <title>Filtered Events</title>
+            <meta name="description" content={`Filtered events for ${numMonth}/${numYear}`} />
+        </Head>
+    )
 
     if (isNaN(numYear) || isNaN(numMonth) || numYear > 2030 || numYear < 2021 || numMonth < 1 || numMonth > 12 || error) {
         return (
