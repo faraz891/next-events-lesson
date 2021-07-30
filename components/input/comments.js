@@ -27,11 +27,14 @@ function Comments(props) {
   }
 
   useEffect(() => {
-    if (showComments) {
-      fetch('/api/comments/' + eventId)
-        .then(res => res.json())
-        .then(data => setComments(data.comments))
-    }
+    fetch(`/api/comments/${eventId}`, {
+      method: "GET",
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+      .then(res => res.json())
+      .then(data => setComments(data.comments))
   }, [])
 
   return (
