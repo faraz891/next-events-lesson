@@ -1,8 +1,10 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useContext } from 'react';
 import classes from './new-comment.module.css';
+
 
 function NewComment(props) {
   const [isInvalid, setIsInvalid] = useState(false);
+
 
   const emailInputRef = useRef();
   const nameInputRef = useRef();
@@ -14,6 +16,7 @@ function NewComment(props) {
     const enteredEmail = emailInputRef.current.value;
     const enteredName = nameInputRef.current.value;
     const enteredComment = commentInputRef.current.value;
+
 
     if (
       !enteredEmail ||

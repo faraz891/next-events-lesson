@@ -1,6 +1,7 @@
 import classes from './comment-list.module.css';
 
 function CommentList({ comments }) {
+
   return (
     <ul className={classes.comments}>
       {comments.map(comment => (
@@ -11,7 +12,6 @@ function CommentList({ comments }) {
           </div>
         </li>
       ))}
-
     </ul>
   );
 }
